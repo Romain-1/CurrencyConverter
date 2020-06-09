@@ -3,6 +3,8 @@ const port = 8080;
 const app = express();
 const axios = require('axios');
 
+app.use(express.json());
+
 async function getCurrency(date) {
   let response = undefined;
   try {
@@ -27,21 +29,20 @@ function convertCurrency(amount, currencyFrom, currencyTo, currencies) {
 }
 
 async function getCurrencyMethod(req, res) {
-  const currencyFrom = req.query.from;
-  const currencyTo = req.query.to;
-  let amount = req.query.amount;
-  const date = req.query.date;
+  const currencyFrom = req.body.base_currency;
+  const currencyTo = req.body.quote_currency;
+  const amount = req.body.value;
+  const date = (req.body.date ? req.body.date : "latest");
 
   if (currencyFrom === undefined
     || currencyTo === undefined
-    || amount === undefined
-    || date === undefined) {
-    return res.status(400).send("Bad request, invalid query.");
+    || amount === undefined) {
+      console.log(amount, currencyTo, currencyFrom);
+    return res.status(400).send("Bad request, invalid body.");
   }
   if (isNaN(amount)) {
     return res.status(400).send("Bad request, amount should be an integer");
   }
-  amount = parseInt(amount);
   let currencies = await getCurrency(date);
   if (currencies === undefined) {
     return res.status(400).send("An error occured when trying to access API.");
@@ -52,6 +53,7 @@ async function getCurrencyMethod(req, res) {
     return res.status(400).send(`Unrecognized currency.`);
   }
   console.log(currencyFrom, currencyTo, amount, date, result);
+  //req.send(result);
   return res.send(`From: ${currencyFrom}\tTo: ${currencyTo}\tAmount: ${amount}\tDate: ${date}\tResult: ${result}`);
 }
 
