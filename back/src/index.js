@@ -1,9 +1,8 @@
 const express = require('express');
-const port = 8080;
+const port = 4040;
 const app = express();
 const axios = require('axios');
-
-app.use(express.json());
+const cors = require('cors')
 
 async function getCurrency(date) {
   let response = undefined;
@@ -29,6 +28,7 @@ function convertCurrency(amount, currencyFrom, currencyTo, currencies) {
 }
 
 async function getCurrencyMethod(req, res) {
+  console.log('Body:', req.body);
   const currencyFrom = req.body.base_currency;
   const currencyTo = req.body.quote_currency;
   const amount = req.body.value;
@@ -53,18 +53,15 @@ async function getCurrencyMethod(req, res) {
     return res.status(400).send(`Unrecognized currency.`);
   }
   console.log(currencyFrom, currencyTo, amount, date, result);
-  //req.send(result);
-  return res.send(`From: ${currencyFrom}\tTo: ${currencyTo}\tAmount: ${amount}\tDate: ${date}\tResult: ${result}`);
-}
-
-function addRoutes(app) {
-  app.get("/", getCurrencyMethod);
+  return res.send({value: result});
 }
 
 (async function() {
-  addRoutes(app);
+  app.use(cors());
+  app.use(express.json());
+  app.post("/", getCurrencyMethod);
   app.listen(port, () => {
     console.log("Ready.");
   });
-})()
+})();
 
