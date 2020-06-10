@@ -20,11 +20,10 @@ function convertCurrency(amount, currencyFrom, currencyTo, currencies) {
     console.log("Unrecognized currency.");
     return (undefined);
   }
-  return (
-    amount /
-    currencies[currencyFrom] *
-    currencies[currencyTo]
-  );
+  return ({
+    value: amount * currencies[currencyTo] / currencies[currencyFrom],
+    ratio: currencies[currencyTo] / currencies[currencyFrom]
+  });
 }
 
 async function getCurrencyMethod(req, res) {
@@ -44,6 +43,7 @@ async function getCurrencyMethod(req, res) {
     return res.status(400).send("Bad request, amount should be an integer");
   }
   let currencies = await getCurrency(date);
+  console.log(currencies);
   if (currencies === undefined) {
     return res.status(400).send("An error occured when trying to access API.");
   }
@@ -53,7 +53,7 @@ async function getCurrencyMethod(req, res) {
     return res.status(400).send(`Unrecognized currency.`);
   }
   console.log(currencyFrom, currencyTo, amount, date, result);
-  return res.send({value: result});
+  return res.send(result);
 }
 
 (async function() {
@@ -64,4 +64,3 @@ async function getCurrencyMethod(req, res) {
     console.log("Ready.");
   });
 })();
-
