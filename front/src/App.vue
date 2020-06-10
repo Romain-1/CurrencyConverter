@@ -124,13 +124,6 @@ body {
   background-color: blue;
 }
 
-body {
-}
-
-#app {
-  background-image: url("./assets/money.png");
-}
-
 .row {
   float: left;
   display: flex;
