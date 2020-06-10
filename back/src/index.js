@@ -19,15 +19,11 @@ async function getHistoric(date, currencyFrom, currencyTo) {
   let ordered = [];
   try {
     response = await axios.get(
-      `https://api.exchangeratesapi.io/history?start_at=2019-10-01&end_at=${date}&base=${currencyFrom}&symbols=${currencyTo}`
+      `https://api.exchangeratesapi.io/history?start_at=2000-01-01&end_at=${date}&base=${currencyFrom}&symbols=${currencyTo}`
     );
     Object.keys(response.data.rates).sort().forEach(function(key) {
-      ordered.push(response.data.rates[key][currencyTo]);
+      ordered.push([Date.parse(key), response.data.rates[key][currencyTo]]);
     });
-    // const min = Math.min.apply(null,ordered);
-    // for (var i = 0; i < ordered.length; i++) {
-    //     array[i] -= min;
-    // }
   } catch (e) {
     console.log(e.Error);
   }
@@ -71,7 +67,6 @@ async function getCurrencyMethod(req, res) {
   if (result === undefined) {
     return res.status(400).send(`Unrecognized currency.`);
   }
-  console.log(currencyFrom, currencyTo, amount, date, result);
   return res.send(result);
 }
 

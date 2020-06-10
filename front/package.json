@@ -8,9 +8,11 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "apexcharts": "^3.19.2",
     "axios": "^0.19.2",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
+    "vue-apexcharts": "^1.5.3",
     "vue-world-map": "^0.1.1",
     "vuebars": "^0.1.6",
     "vuetrend": "^0.3.4"
