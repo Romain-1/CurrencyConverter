@@ -9,9 +9,29 @@ async function getCurrency(date) {
   try {
     response = await axios.get(`https://api.exchangeratesapi.io/${date}`);
   } catch (e) {
-    console.log("Error when trying to access API.");
+    console.log(e);
   }
   return (response ? response.data.rates : undefined);
+}
+
+async function getHistoric(date, currencyFrom, currencyTo) {
+  let response = undefined;
+  let ordered = [];
+  try {
+    response = await axios.get(
+      `https://api.exchangeratesapi.io/history?start_at=2019-10-01&end_at=${date}&base=${currencyFrom}&symbols=${currencyTo}`
+    );
+    Object.keys(response.data.rates).sort().forEach(function(key) {
+      ordered.push(response.data.rates[key][currencyTo]);
+    });
+    // const min = Math.min.apply(null,ordered);
+    // for (var i = 0; i < ordered.length; i++) {
+    //     array[i] -= min;
+    // }
+  } catch (e) {
+    console.log(e.Error);
+  }
+  return (ordered);
 }
 
 function convertCurrency(amount, currencyFrom, currencyTo, currencies) {
@@ -27,7 +47,6 @@ function convertCurrency(amount, currencyFrom, currencyTo, currencies) {
 }
 
 async function getCurrencyMethod(req, res) {
-  console.log('Body:', req.body);
   const currencyFrom = req.body.base_currency;
   const currencyTo = req.body.quote_currency;
   const amount = req.body.value;
@@ -43,12 +62,12 @@ async function getCurrencyMethod(req, res) {
     return res.status(400).send("Bad request, amount should be an integer");
   }
   let currencies = await getCurrency(date);
-  console.log(currencies);
   if (currencies === undefined) {
     return res.status(400).send("An error occured when trying to access API.");
   }
   currencies['EUR'] = 1.0;
   const result = convertCurrency(amount, currencyFrom, currencyTo, currencies);
+  result['historic'] = await getHistoric(date, currencyFrom, currencyTo);
   if (result === undefined) {
     return res.status(400).send(`Unrecognized currency.`);
   }

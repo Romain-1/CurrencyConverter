@@ -1,11 +1,11 @@
 <template>
-  <div id="app" class="bg-blue-900">
+  <div id="app">
     <h1 class="title">Currency Converter</h1>
     <div class="row">
       <div class="container">
         <h2 class="title">Amount</h2>
         <br/>
-        <input type="text" v-model="amount" size="15" @input="actualise()">
+        <input type="text" v-model="amount" @input="actualise()">
       </div>
       <div class="container">
         <h2 class="title">From</h2>
@@ -28,21 +28,31 @@
       <div class="container">
         <h2 class="title">Date</h2>
         <br/>
-        <input type="text" v-model="date" size="15">
-        <p>YYYY-MM-DD</p>
+        <center>
+          <input v-model="date" type="date" @input="convert()">
+        </center>
       </div>
-      <div class="container" id="container-result">
+      <div class="container">
         <h2 class="title">Result</h2>
         <br/>
-        <p class="result">
-          {{ amount }} {{ base }} = {{ result }} {{ quote }}
+        <p id="result-text">
+          {{ amount }} {{ base }} ⮀ {{ result }} {{ quote }}
         </p>
       </div>
+    </div>
+    <div class="row">
+      <trend
+        :data="historic"
+        :gradient="['#ffbe88', '#ff93df', '#2c3e50']"
+        auto-draw
+        smooth
+      ></trend>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 
 export default {
   data: function() {
@@ -50,9 +60,11 @@ export default {
       amount: 1,
       base: "EUR",
       quote: "USD",
-      date: "latest",
+      date: "2020-06-10",
+      historic: [1, 5, 7, 2, 7, 2, 9, 0],
       ratio: 1.0,
       result: 1.1294,
+      menu_display: true,
       currencies: [
         { value: 'EUR', text: 'EUR - Euro' },
         { value: 'CAD', text: 'CAD - Canadian Dollar' },
@@ -92,7 +104,6 @@ export default {
   },
   methods: {
     convert: async function() {
-      const axios = require('axios');
       try {
         const result = (await axios.post("http://localhost:4040/", {
           base_currency: this.base,
@@ -102,6 +113,7 @@ export default {
         })).data;
         this.ratio = result.ratio;
         this.result = result.value;
+        this.historic = result.historic;
         console.log(this.ratio);
       } catch (e) {
         console.log(e);
@@ -120,13 +132,9 @@ export default {
   src: url("./assets/coolveticarg.ttf");
 }
 
-body {
-  background-color: blue;
-}
-
 .row {
-  float: left;
   display: flex;
+  justify-content: center;
 }
 
 .container {
@@ -136,6 +144,8 @@ body {
   border-radius: 5px;
   padding: 10px;
   margin: 10px;
+  width: 250px;
+  text-align: center;
 }
 
 .container:hover {
@@ -143,7 +153,7 @@ body {
   -webkit-transition: background-color 1s;
 }
 
-select, input, .result {
+select, input, #result-text {
   font-family: sans-serif;
 	font-weight: 700;
   border-radius: 5px;
@@ -167,12 +177,15 @@ select {
 	background-position: right .7em top 50%, 0 0;
 	background-size: .65em auto, 100%;
 }
+
 select::-ms-expand {
 	display: none;
 }
+
 select:hover {
 	border-color: #888;
 }
+
 select:focus {
 	border-color: #aaa;
 	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
@@ -180,6 +193,7 @@ select:focus {
 	color: #222;
 	outline: none;
 }
+
 select option {
 	font-weight:normal;
 }
@@ -188,12 +202,15 @@ h1 {
   text-align: center;
 }
 
-#container-result {
-  background-color: gold;
-}
-
 .title {
   font-family: sans-serif;
+  color: rgb(30, 54, 70);
 }
+
+#app, .row, .container,  {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 </style>
 
